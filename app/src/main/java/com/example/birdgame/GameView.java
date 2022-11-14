@@ -11,74 +11,90 @@ import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.View;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GameView extends View {
 
     private int viewWidth;
     private int viewHeight;
     private int points = 0;
     private Sprite playerBird;
-    private Sprite enemyBird;
-    private Sprite enemyBird1;
-    private Sprite enemyBird2;
     private final int timerInterval = 30;
+    List<Sprite> list = new ArrayList<Sprite>();
+    public void createEnemy(int count){
+        for(int birdCount =0;birdCount<count;birdCount++)
+        {
+            Bitmap b = BitmapFactory.decodeResource(getResources(),R.drawable.enemy);
+            int w = b.getWidth()/5;
+            int h = b.getHeight()/3;
+            Rect firstFrame = new Rect(4*w, 0, 5*w, h);
+            Sprite name = new Sprite(2000, 250, -300, 0, firstFrame, b);
+            for (int i = 0; i < 3; i++) {
+                for (int j = 4; j >= 0; j--) {
+                    if (i ==0 && j == 4) {
+                        continue;
+                    }
+                    if (i ==2 && j == 0) {
+                        continue;
+                    }
+                    name.addFrame(new Rect(j*w, i*h, j*w+w, i*w+w));
+                }
+            }
+            list.add(name);
+        }
+    }
+    public GameView(Context context) {
+        super(context);
+        createBird();
+        createEnemy(10);
+
+        Timer t = new Timer();
+        t.start();
+    }
     protected void update () {
         playerBird.update(timerInterval);
-        enemyBird.update(timerInterval);
-        enemyBird1.update(timerInterval);
-        enemyBird2.update(timerInterval);
+
+        for (Sprite sp:list) {
+            sp.update(timerInterval);
+        }
+
         invalidate();
         if (playerBird.getY() + playerBird.getFrameHeight() >
                 viewHeight) {
-            playerBird.setY(viewHeight -
-                    playerBird.getFrameHeight());
+            playerBird.setY(viewHeight -  playerBird.getFrameHeight());
             playerBird.setVy(-playerBird.getVy());
             points--;
+
         }
-        else if (playerBird.getY() < 0) {
+        if (playerBird.getY() < 0) {
             playerBird.setY(0);
             playerBird.setVy(-playerBird.getVy());
             points--;
         }
-        if (enemyBird.getX() < - enemyBird.getFrameWidth()) {
-            teleportEnemy (enemyBird);
-            points +=10;
-        }
-        if (enemyBird.intersect(playerBird)) {
-            teleportEnemy (enemyBird);
-            points -= 40;
+        for (Sprite enemy:list) {
+            if (enemy.getX() < - enemy.getFrameWidth()) {
+                teleportEnemy (enemy);
+                points +=10;
+            }
+            if (enemy.intersect(playerBird)) {
+                teleportEnemy (enemy);
+                points -= 40;
+            }
         }
 
-        if (enemyBird1.getX() < - enemyBird1.getFrameWidth()) {
-            teleportEnemy (enemyBird1);
-            points +=10;
-        }
-        if (enemyBird1.intersect(playerBird)) {
-            teleportEnemy (enemyBird1);
-            points -= 40;
-        }
-        if (enemyBird2.getX() < - enemyBird2.getFrameWidth()) {
-            teleportEnemy (enemyBird2);
-            points +=10;
-        }
-        if (enemyBird2.intersect(playerBird)) {
-            teleportEnemy (enemyBird2);
-            points -= 40;
-        }
     }
     private void teleportEnemy (Sprite enemy) {
         enemy.setX(viewWidth + Math.random() * 500);
         enemy.setY(Math.random() * (viewHeight - enemy.getFrameHeight()));
     }
 
-
-    public GameView(Context context) {
-        super(context);
-        Bitmap b = BitmapFactory.decodeResource(getResources(),
-                R.drawable.player);
+    private void createBird(){
+        Bitmap b = BitmapFactory.decodeResource(getResources(), R.drawable.player);
         int w = b.getWidth()/5;
         int h = b.getHeight()/3;
         Rect firstFrame = new Rect(0, 0, w, h);
-        playerBird = new Sprite(10, 0, 0, 400, firstFrame, b);
+        playerBird  = new Sprite(10, 0, 0, 400, firstFrame, b);
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 4; j++) {
                 if (i == 0 && j == 0) {
@@ -87,54 +103,10 @@ public class GameView extends View {
                 if (i == 2 && j == 3) {
                     continue;
                 }
-                playerBird.addFrame(new Rect(j * w, i * h, j * w + w, i
-                        * w + w));
+                playerBird.addFrame(new Rect(j * w, i * h, j * w + w,
+                        i* w + w));
             }
         }
-
-        b = BitmapFactory.decodeResource(getResources(),R.drawable.enemy);
-        w = b.getWidth()/5;
-        h = b.getHeight()/3;
-        firstFrame = new Rect(4*w, 0, 5*w, h);
-        enemyBird = new Sprite(2000, 250, -300, 0, firstFrame, b);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 4; j >= 0; j--) {
-                if (i ==0 && j == 4) {
-                    continue;
-                }
-                if (i ==2 && j == 0) {
-                    continue;
-                }
-                enemyBird.addFrame(new Rect(j*w, i*h, j*w+w, i*w+w));
-            }
-        }
-        enemyBird1 = new Sprite(2000, 250, -300, 0, firstFrame, b);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 4; j >= 0; j--) {
-                if (i ==0 && j == 4) {
-                    continue;
-                }
-                if (i ==2 && j == 0) {
-                    continue;
-                }
-                enemyBird1.addFrame(new Rect(j*w, i*h, j*w+w, i*w+w));
-            }
-        }
-        enemyBird2 = new Sprite(2000, 250, -300, 0, firstFrame, b);
-        for (int i = 0; i < 3; i++) {
-            for (int j = 4; j >= 0; j--) {
-                if (i ==0 && j == 4) {
-                    continue;
-                }
-                if (i ==2 && j == 0) {
-                    continue;
-                }
-                enemyBird2.addFrame(new Rect(j*w, i*h, j*w+w, i*w+w));
-            }
-        }
-
-        Timer t = new Timer();
-        t.start();
     }
     @Override
     protected void onSizeChanged(int w, int h, int oldw, int oldh)
@@ -155,9 +127,12 @@ public class GameView extends View {
         canvas.drawText(points+"", viewWidth - 100, 70, p);
 
         playerBird.draw(canvas);
-        enemyBird.draw(canvas);
-        enemyBird1.draw(canvas);
-        enemyBird2.draw(canvas);
+        for (Sprite enemy:list
+             ) {
+            enemy.draw(canvas);
+
+        }
+
 
     }
     @Override
