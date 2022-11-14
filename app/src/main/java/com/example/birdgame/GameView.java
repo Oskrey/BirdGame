@@ -10,6 +10,7 @@ import android.graphics.Rect;
 import android.os.CountDownTimer;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewDebug;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,7 +19,9 @@ public class GameView extends View {
 
     private int viewWidth;
     private int viewHeight;
-    private int points = 0;
+    private int points = 2;
+    private int lastPoints = 0;
+    private int level = 0;
     private Sprite playerBird;
     private final int timerInterval = 30;
     List<Sprite> list = new ArrayList<Sprite>();
@@ -47,7 +50,7 @@ public class GameView extends View {
     public GameView(Context context) {
         super(context);
         createBird();
-        createEnemy(10);
+        createEnemy(1);
 
         Timer t = new Timer();
         t.start();
@@ -63,28 +66,54 @@ public class GameView extends View {
         if (playerBird.getY() + playerBird.getFrameHeight() >
                 viewHeight) {
             playerBird.setY(viewHeight -  playerBird.getFrameHeight());
-            playerBird.setVy(-playerBird.getVy());
+            playerBird.setDir(-playerBird.getDir());
             points--;
 
         }
         if (playerBird.getY() < 0) {
             playerBird.setY(0);
-            playerBird.setVy(-playerBird.getVy());
+            playerBird.setDir(-playerBird.getDir());
             points--;
         }
         for (Sprite enemy:list) {
             if (enemy.getX() < - enemy.getFrameWidth()) {
                 teleportEnemy (enemy);
-                points +=10;
+                points +=50;
             }
             if (enemy.intersect(playerBird)) {
                 teleportEnemy (enemy);
-                points -= 40;
+                points -= 60;
+            }
+        }
+
+
+        if (points >= lastPoints+100)
+        {
+            level++;
+            lastPoints = points;
+            playerBird.setVy(playerBird.getVy()+20);
+            createEnemy(1);
+
+            for (Sprite sp: list) {
+                sp.setVx(sp.getVx()-20);
+            }
+        }
+
+
+
+        if (points <= lastPoints-100 && points >0)
+        {
+            level--;
+            lastPoints = points;
+            playerBird.setVy(playerBird.getVy()-20);
+            list.remove(list.size()-1);
+            for (Sprite sp: list) {
+                sp.setVx(sp.getVx()+20);
             }
         }
 
     }
-    private void teleportEnemy (Sprite enemy) {
+     void teleportEnemy (Sprite enemy) {
         enemy.setX(viewWidth + Math.random() * 500);
         enemy.setY(Math.random() * (viewHeight - enemy.getFrameHeight()));
     }
@@ -123,8 +152,8 @@ public class GameView extends View {
         p.setAntiAlias(true);
         p.setTextSize(55.0f);
         p.setColor(Color.WHITE);
-
-        canvas.drawText(points+"", viewWidth - 100, 70, p);
+        canvas.drawText( "Уровень:"+level+" Очков набрано: "+points+"", 0, 70, p);
+        list.size();
 
         playerBird.draw(canvas);
         for (Sprite enemy:list
@@ -133,13 +162,12 @@ public class GameView extends View {
 
         }
 
-
     }
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         int eventAction = event.getAction();
         if (eventAction == MotionEvent.ACTION_DOWN) {
-            playerBird.setVy(playerBird.getVy() *-1);
+            playerBird.setDir(-playerBird.getDir());
         }
         return true;
     }

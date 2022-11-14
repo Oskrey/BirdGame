@@ -17,6 +17,7 @@ public class Sprite {
     private double frameTime;
     private double timeForCurrentFrame;
     private double x;
+    private double dir = 1;
     private double y;
     private double velocityX;
     private double velocityY;
@@ -106,7 +107,7 @@ public class Sprite {
             timeForCurrentFrame = timeForCurrentFrame - frameTime;
         }
         x = x + velocityX * ms/1000.0;
-        y = y + velocityY * ms/1000.0;
+        y = y + velocityY * ms/1000.0* dir;
     }
     public void draw (Canvas canvas) {
         Paint p = new Paint();
@@ -121,5 +122,13 @@ public class Sprite {
     }
     public boolean intersect (Sprite s) {
         return getBoundingBoxRect().intersect(s.getBoundingBoxRect());
+    }
+
+    public double getDir() {
+        return dir;
+    }
+
+    public void setDir(double dir) {
+        this.dir = dir;
     }
 }
