@@ -78,11 +78,11 @@ public class GameView extends View {
         for (Sprite enemy:list) {
             if (enemy.getX() < - enemy.getFrameWidth()) {
                 teleportEnemy (enemy);
-                points +=50;
+                points +=20;
             }
             if (enemy.intersect(playerBird)) {
                 teleportEnemy (enemy);
-                points -= 60;
+                points -= 10;
             }
         }
 
